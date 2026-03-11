@@ -305,3 +305,128 @@ body {
   text-align: right;
   font-weight: 500;
 }
+
+/* ===================== */
+/* RESPONSIVE - TABLET   */
+/* ===================== */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  /* All span cards collapse to 2 cols */
+  .chart-card,
+  .table-card {
+    grid-column: span 2;
+  }
+
+  .progress-card {
+    grid-column: span 2;
+  }
+
+  .gauges-container {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .gauge-item {
+    width: 48%;
+  }
+}
+
+/* ===================== */
+/* RESPONSIVE - MOBILE   */
+/* ===================== */
+@media (max-width: 600px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .main-content {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .header-title {
+    font-size: 1rem;
+  }
+
+  /* All cards full width */
+  .chart-card,
+  .table-card,
+  .progress-card {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+
+  /* Gauges: 2x2 grid */
+  .gauges-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+  }
+
+  .gauge-item {
+    width: 100%;
+  }
+
+  .gauge-value {
+    font-size: 1rem;
+  }
+
+  .gauge-label {
+    font-size: 0.7rem;
+  }
+
+  /* Table: hide Type column, shrink padding */
+  .ticket-table td,
+  .ticket-table th {
+    padding: 8px 4px;
+    font-size: 0.78rem;
+  }
+
+  /* Hide 'Type' column on mobile (3rd column) */
+  .ticket-table th:nth-child(3),
+  .ticket-table td:nth-child(3) {
+    display: none;
+  }
+
+  /* Make table horizontally scrollable */
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .card {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-list {
+    gap: 0.8rem;
+  }
+
+  .status-badge {
+    padding: 3px 6px;
+    font-size: 0.65rem;
+  }
+}
