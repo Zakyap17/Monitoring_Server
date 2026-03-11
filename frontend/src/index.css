@@ -126,7 +126,7 @@ body {
 }
 
 .chart-card {
-  grid-column: span 3;
+  grid-column: span 4;
   grid-row: span 2;
 }
 
@@ -400,9 +400,11 @@ body {
     font-size: 0.78rem;
   }
 
-  /* Hide 'Type' column on mobile (3rd column) */
+  /* Hide 'Type' AND 'CPU Usage' columns on mobile */
   .ticket-table th:nth-child(3),
-  .ticket-table td:nth-child(3) {
+  .ticket-table td:nth-child(3),
+  .ticket-table th:nth-child(4),
+  .ticket-table td:nth-child(4) {
     display: none;
   }
 

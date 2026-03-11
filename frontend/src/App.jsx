@@ -113,7 +113,7 @@ function App() {
 
         <div className="dashboard-grid">
           {/* Server Activity Chart (full width) */}
-          <div className="card chart-card" style={{ gridColumn: 'span 4' }}>
+          <div className="card chart-card">
             <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between' }}>
               SERVER ACTIVITY
               <div style={{ display: 'flex', gap: '1rem', textTransform: 'none', fontSize: '11px' }}>
@@ -155,7 +155,7 @@ function App() {
           </div>
 
           {/* VM Status Table - live data */}
-          <div className="card table-card" style={{ marginTop: '1.5rem', gridColumn: 'span 3' }}>
+          <div className="card table-card" style={{ marginTop: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <div className="card-title" style={{ marginBottom: 0 }}>VM STATUS</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
