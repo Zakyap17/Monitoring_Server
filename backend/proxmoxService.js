@@ -30,7 +30,7 @@ class ProxmoxService {
         let totalCpuPercent = 0;
         let totalMemUsedGB = 0;
         let totalMemMaxGB = 0;
-        let maxTemp = null;
+        let totalNetMbps = 0;
 
         for (const node of nodes) {
             const statusRes = await this.client.get(`/nodes/${node.node}/status`);
@@ -39,18 +39,30 @@ class ProxmoxService {
             totalCpuPercent += (status.cpu * 100);
             totalMemUsedGB += status.memory.used / (1024 ** 3);
             totalMemMaxGB += status.memory.total / (1024 ** 3);
+
+            // Get netin + netout from RRD (bytes/sec) and convert to Mbps
+            try {
+                const rrdRes = await this.client.get(`/nodes/${node.node}/rrddata?timeframe=hour`);
+                const latest = rrdRes.data.data[rrdRes.data.data.length - 1];
+                if (latest?.netin != null && latest?.netout != null) {
+                    const bytesPerSec = (latest.netin + latest.netout);
+                    totalNetMbps += (bytesPerSec * 8) / 1_000_000;
+                }
+            } catch (_) { }
         }
 
         const avgCpu = Math.round(totalCpuPercent / nodes.length);
         const memPercent = Math.round((totalMemUsedGB / totalMemMaxGB) * 100);
         const temp = await getCPUTemperature();
+        const internet = parseFloat(totalNetMbps.toFixed(1));
 
         return {
             cpu: avgCpu,
             memory: memPercent,
             memUsedGB: totalMemUsedGB.toFixed(1),
             memTotalGB: totalMemMaxGB.toFixed(1),
-            temp
+            temp,
+            internet
         };
     }
 

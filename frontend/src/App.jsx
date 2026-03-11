@@ -149,7 +149,7 @@ function App() {
             <div className="gauges-container">
               <Gauge label="CPU" value={cluster?.cpu ?? '—'} color="var(--accent-blue)" />
               <Gauge label="Memory" value={cluster?.memory ?? '—'} color="var(--accent-blue)" />
-              <Gauge label="Internet Speed" value={250} color="var(--accent-cyan)" unit=" Mbps" />
+              <Gauge label="Internet Speed" value={cluster?.internet ?? '—'} color="var(--accent-cyan)" unit=" Mbps" />
               <Gauge label="Temp" value={cluster?.temp ?? 'N/A'} color="var(--accent-yellow)" unit={cluster?.temp != null ? '°C' : ''} />
             </div>
           </div>
