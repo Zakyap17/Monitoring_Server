@@ -66,6 +66,38 @@ class ProxmoxService {
         };
     }
 
+    // Get 1-hour historical data for the chart (CPU and Memory)
+    async getClusterHistory() {
+        const nodes = await this.getNodes();
+        if (nodes.length === 0) return [];
+
+        try {
+            // Fetch timeframe=hour from the first node
+            const rrdRes = await this.client.get(`/nodes/${nodes[0].node}/rrddata?timeframe=hour`);
+            const rrdData = rrdRes.data.data;
+
+            // Filter out nulls and take the last 15 data points
+            const validPoints = rrdData.filter(p => p.cpu != null && p.memused != null);
+            const lastPoints = validPoints.slice(-15);
+
+            const history = [];
+            for (const p of lastPoints) {
+                // format time as HH:MM
+                const date = new Date(p.time * 1000);
+                const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                history.push({
+                    time,
+                    CPU: parseFloat((p.cpu * 100).toFixed(1)),
+                    Memory: parseFloat(((p.memused / p.memtotal) * 100).toFixed(1))
+                });
+            }
+            return history;
+        } catch (error) {
+            console.error('[History Error]', error.message);
+            return [];
+        }
+    }
+
     // Real disk/storage data from Proxmox
     async getDiskUsage() {
         const nodes = await this.getNodes();

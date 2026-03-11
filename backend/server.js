@@ -31,6 +31,17 @@ app.get('/api/cluster/status', async (req, res) => {
     }
 });
 
+// GET /api/cluster/history - Returns historical CPU and Memory usage for the chart
+app.get('/api/cluster/history', async (req, res) => {
+    try {
+        const data = await proxmoxService.getClusterHistory();
+        res.json(data);
+    } catch (error) {
+        console.error('[Cluster History Error]', error.message);
+        res.status(500).json({ error: 'Failed to fetch cluster history.' });
+    }
+});
+
 // GET /api/vms/status - Returns a list of all VMs and containers with CPU, RAM, Online/Offline
 app.get('/api/vms/status', async (req, res) => {
     try {

@@ -7,20 +7,7 @@ import './index.css'
 
 const API_BASE = '/api'
 
-// Mock Activity data for the chart (will be replaced when backend adds activity endpoint)
-const MOCK_ACTIVITY = [
-  { time: '01:00', Server_01: 20, Server_02: 30 },
-  { time: '02:00', Server_01: 45, Server_02: 50 },
-  { time: '03:00', Server_01: 28, Server_02: 60 },
-  { time: '04:00', Server_01: 80, Server_02: 40 },
-  { time: '05:00', Server_01: 40, Server_02: 70 },
-  { time: '06:00', Server_01: 65, Server_02: 50 },
-  { time: '07:00', Server_01: 35, Server_02: 60 },
-  { time: '08:00', Server_01: 75, Server_02: 30 },
-  { time: '09:00', Server_01: 50, Server_02: 90 },
-]
-
-// Gauge Component
+// App Component
 const Gauge = ({ label, value, color, unit = '%' }) => {
   const safeValue = Math.min(Math.max(Number(value) || 0, 0), 100)
   const data = [
@@ -64,6 +51,7 @@ const StatusDot = ({ connected }) => (
 
 function App() {
   const [cluster, setCluster] = useState(null)
+  const [history, setHistory] = useState([])
   const [vms, setVMs] = useState([])
   const [disks, setDisks] = useState([])
   const [connected, setConnected] = useState(false)
@@ -72,16 +60,21 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const [clusterRes, vmsRes, disksRes] = await Promise.all([
+      const [clusterRes, historyRes, vmsRes, disksRes] = await Promise.all([
         fetch(`${API_BASE}/cluster/status`),
+        fetch(`${API_BASE}/cluster/history`),
         fetch(`${API_BASE}/vms/status`),
         fetch(`${API_BASE}/disks/usage`)
       ])
-      if (!clusterRes.ok || !vmsRes.ok || !disksRes.ok) throw new Error('API returned error status')
+      if (!clusterRes.ok || !historyRes.ok || !vmsRes.ok || !disksRes.ok) throw new Error('API returned error status')
+
       const clusterData = await clusterRes.json()
+      const historyData = await historyRes.json()
       const vmsData = await vmsRes.json()
       const disksData = await disksRes.json()
+
       setCluster(clusterData)
+      setHistory(historyData)
       setVMs(vmsData)
       setDisks(disksData)
       setConnected(true)
@@ -115,34 +108,38 @@ function App() {
           {/* Server Activity Chart (full width) */}
           <div className="card chart-card">
             <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              SERVER ACTIVITY
+              SERVER ACTIVITY (Real-time CPU & Memory)
               <div style={{ display: 'flex', gap: '1rem', textTransform: 'none', fontSize: '11px' }}>
-                <span style={{ color: 'var(--accent-cyan)' }}>● Server_01</span>
-                <span style={{ color: 'var(--accent-blue)' }}>● Server_02</span>
+                <span style={{ color: 'var(--accent-cyan)' }}>● CPU</span>
+                <span style={{ color: 'var(--accent-blue)' }}>● Memory</span>
               </div>
             </div>
 
             <div style={{ flex: 1, minHeight: '180px', marginTop: '10px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MOCK_ACTIVITY} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorS1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--accent-cyan)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="var(--accent-cyan)" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="colorS2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--accent-blue)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(255,255,255,0.1)' }} itemStyle={{ color: 'var(--text-main)' }} />
-                  <Area type="monotone" dataKey="Server_01" stroke="var(--accent-cyan)" strokeWidth={2} fillOpacity={1} fill="url(#colorS1)" />
-                  <Area type="monotone" dataKey="Server_02" stroke="var(--accent-blue)" strokeWidth={2} fillOpacity={1} fill="url(#colorS2)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              {history.length === 0 ? (
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat data history...</div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={history} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorS1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--accent-cyan)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--accent-cyan)" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorS2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--accent-blue)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} domain={[0, 100]} />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'rgba(255,255,255,0.1)' }} itemStyle={{ color: 'var(--text-main)' }} />
+                    <Area type="monotone" dataKey="CPU" stroke="var(--accent-cyan)" strokeWidth={2} fillOpacity={1} fill="url(#colorS1)" />
+                    <Area type="monotone" dataKey="Memory" stroke="var(--accent-blue)" strokeWidth={2} fillOpacity={1} fill="url(#colorS2)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
             {/* Resource Gauges - live data */}
